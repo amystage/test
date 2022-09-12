@@ -1,0 +1,94 @@
+UNDERCLAIM        
+        
+        Given there are "Society" defined in database
+            | ID | SOCIETY_CODE | SOCIETY_NAME | VENDOR_NUMBER |
+            | 1  | 023          | STEMRA       | 1015364       |
+            | 2  | 078          | BUMA         | 1010089       |
+        And there are "Distribution Account" defined in database
+            | ID | ACCOUNT | CLAIM_STATUS | DESCRIPTION |
+            | 1  | 30100   | ALL          | GROSS       |
+
+        And there are "Potential Claim" defined in database
+            | ID                                 | POTENTIAL_CLAIM_SET_VID          | LINE_ID | CLAIMANT_NAMESPACE | CLAIMANT_ID | CLAIMANT_NAME | CLAIMANT_FIRST_NAME | ROLE_CODE | MR_RIGHT_CODE | MR_SOCIETY | MR_IN_CONFLICT | MR_SHARE_TYPE | MR_COPYRIGHT_SHARE | MR_SHARE | MR_INVOICEABLE | MR_INVOICEABLE_REASON       | MR_DISTRIBUTABLE | MR_DISTRIBUTABLE_REASON     | MR_ROYALTY | PR_RIGHT_CODE | PR_SOCIETY | PR_IN_CONFLICT | PR_SHARE_TYPE | PR_COPYRIGHT_SHARE | PR_SHARE | PR_INVOICEABLE | PR_INVOICEABLE_REASON       | PR_DISTRIBUTABLE | PR_DISTRIBUTABLE_REASON     | PR_ROYALTY  |
+            | ed30a176034c4b2a8c4a58d52bd41d7d:1 | ed30a176034c4b2a8c4a58d52bd41d7d | 1       | IPI                | 674248913   | GARRITSEN     | MARTIJN G           | C         | MD            | 078        | FALSE          | NORMAL        | 0.00000000         | 1        | TRUE           | WR_DIRECT_MEMBER_REPERTOIRE | TRUE             | WR_DIRECT_MEMBER_REPERTOIRE | 5          | OD            | 023        | FALSE          | NORMAL        | 0.5                | 1        | TRUE           | WR_DIRECT_MEMBER_REPERTOIRE | TRUE             | WR_DIRECT_MEMBER_REPERTOIRE | 8           |
+        And there are "Potential Claim Set" defined in database
+            | ID                                 | VERSION_ID                       | TRACK_EXPLOITATION_ID                        | TRACK_WORK_VID                   | COPYRIGHT_RESULT_VID             | COPYRIGHT_WORK_XREF_VID          | WORK_NAMESPACE | WORK_ID | POTENTIAL_CLAIM_HASH                     | DSP_SALES_TRANSACTION_ID | TERRITORY_CODE | EXPLOITATION_SOURCE | TIER_NAME | USAGE_DATE | ISRC         | ISWC | RECORDING_TITLE | DSP_RESOURCE_ID | RELEASE_ARTIST_NAME | TRACK_ARTIST_NAME | USAGES | SOURCE_CURRENCY |
+            | ed30a176034c4b2a8c4a58d52bd41d7d:1 | ed30a176034c4b2a8c4a58d52bd41d7d | b7327d8bf22cee8e35064af2e84fee0e5e1779bc:110 | 58dfe602fae947798115630f6d3c4f50 | 880bbdc3e2da4860aa188d1179c5df58 | fff9cbe9398d4638992913c0d556d58c | ICE            | 1006    | ed5dd397984bf8f2eb986aa1ff7009c9dd0422f2 | DZR-0000000034           | SE             | Spotify             | premium   | 2021-05-01 | RSA221900107 |      | Linija          | 636357852       | Teodora             | Teodora           | 1.000  | EUR             |
+
+        And I have an Online Distribution
+            | NAME          | BUSINESS_LINE | PAYMENT_DATE | TYPE     | DISTRIBUTE_PAID_INVOICES | DISTRIBUTE_SETTLED_INVOICES | STATUS  |
+            | SPX-3195 Dist | ONLINE        | 2020-03-25   | STANDARD | TRUE                     | FALSE                       | PENDING |
+        And Distribution has "Confirmed Claim" defined in database
+            | ID  | CONFIRMED_CLAIM_SET_ID | POTENTIAL_CLAIM_SET_ID             | POTENTIAL_CLAIM_SET_VID          | COMBINED_SHARE | PR_SHARE | MR_SHARE | PR_AMOUNT   | MR_AMOUNT  | COMBINED_AMOUNT |
+            | 660 | 69                     | ed30a176034c4b2a8c4a58d52bd41d7d:1 | ed30a176034c4b2a8c4a58d52bd41d7d | 1              | 1        | 1        | 5           | 3          | 8               |
+        And Distribution has "Confirmed Claim Set" defined in database
+            | ID | PR_AMOUNT   | MR_AMOUNT  | COMBINED_AMOUNT | STATE    | TRANSACTION_CURRENCY | INVOICE_CURRENCY | INVOICE_EXCHANGE_RATE |
+            | 69 | 5           | 3          | 8               | ACCEPTED | EUR                  | EUR              | 1.00000000            |
+        And Distribution has "Sub Distribution" defined in database
+            | ID | RIGHT_TYPE | SOCIETY_CODE | STATUS  |
+            | 1  | OD         | STEMRA       | PENDING |
+            | 2  | MD         | BUMA         | PENDING |
+
+        When the claims for pending distribution are synced
+        Then Claim Distribution should be populated as expected
+            | STATUS           | STATUS REASON         | RIGHT_TYPE | CONFIRMED_CLAIM_SET_ID | CURRENT_DISTRIBUTION_STATUS | POTENTIAL_CLAIM_ID                 | POTENTIAL_CLAIM_SET_ID             | IP_REMITTED_ROYALTY_AMOUNT |
+            | DISTRIBUTABLE    | RECIPROCAL_AGREEMENT  | MD         | 69                     | PENDING                     | ed30a176034c4b2a8c4a58d52bd41d7d:1 | ed30a176034c4b2a8c4a58d52bd41d7d:1 | 5                          |
+            | DISTRIBUTABLE    | RECIPROCAL_AGREEMENT  | OD         | 69                     | PENDING                     | ed30a176034c4b2a8c4a58d52bd41d7d:1 | ed30a176034c4b2a8c4a58d52bd41d7d:1 | 8                          |
+            | CLAIM_DIFFERENCE | UNDERCLAIM            | MD         |                        | PENDING                     |                                    |                                    | 2                          |
+            | CLAIM_DIFFERENCE | UNDERCLAIM            | OD         |                        | PENDING                     |                                    |                                    | 3                          |
+            
+            
+OVERCLAIM
+
+        Given there are "Society" defined in database
+            | ID | SOCIETY_CODE | SOCIETY_NAME | VENDOR_NUMBER |
+            | 1  | 023          | STEMRA       | 1015364       |
+            | 2  | 078          | BUMA         | 1010089       |
+        And there are "Distribution Account" defined in database
+            | ID | ACCOUNT | CLAIM_STATUS | DESCRIPTION |
+            | 1  | 30100   | ALL          | GROSS       |
+
+        And there are "Potential Claim" defined in database
+            | ID                                 | POTENTIAL_CLAIM_SET_VID          | LINE_ID | CLAIMANT_NAMESPACE | CLAIMANT_ID | CLAIMANT_NAME | CLAIMANT_FIRST_NAME | ROLE_CODE | MR_RIGHT_CODE | MR_SOCIETY | MR_IN_CONFLICT | MR_SHARE_TYPE | MR_COPYRIGHT_SHARE | MR_SHARE | MR_INVOICEABLE | MR_INVOICEABLE_REASON       | MR_DISTRIBUTABLE | MR_DISTRIBUTABLE_REASON     | MR_ROYALTY | PR_RIGHT_CODE | PR_SOCIETY | PR_IN_CONFLICT | PR_SHARE_TYPE | PR_COPYRIGHT_SHARE | PR_SHARE | PR_INVOICEABLE | PR_INVOICEABLE_REASON       | PR_DISTRIBUTABLE | PR_DISTRIBUTABLE_REASON     | PR_ROYALTY  |
+            | dd30a176034c4b2a8c4a58d52bd41d7d:1 | dd30a176034c4b2a8c4a58d52bd41d7d | 1       | IPI                | 674248913   | GARRITSEN     | MARTIJN G           | C         | MD            | 078        | FALSE          | NORMAL        | 0.00000000         | 1        | TRUE           | WR_DIRECT_MEMBER_REPERTOIRE | TRUE             | WR_DIRECT_MEMBER_REPERTOIRE | 3          | OD            | 023        | FALSE          | NORMAL        | 0.5                | 1        | TRUE           | WR_DIRECT_MEMBER_REPERTOIRE | TRUE             | WR_DIRECT_MEMBER_REPERTOIRE | 5           |
+        And there are "Potential Claim Set" defined in database
+            | ID                                 | VERSION_ID                       | TRACK_EXPLOITATION_ID                        | TRACK_WORK_VID                   | COPYRIGHT_RESULT_VID             | COPYRIGHT_WORK_XREF_VID          | WORK_NAMESPACE | WORK_ID | POTENTIAL_CLAIM_HASH                     | DSP_SALES_TRANSACTION_ID | TERRITORY_CODE | EXPLOITATION_SOURCE | TIER_NAME | USAGE_DATE | ISRC         | ISWC | RECORDING_TITLE | DSP_RESOURCE_ID | RELEASE_ARTIST_NAME | TRACK_ARTIST_NAME | USAGES | SOURCE_CURRENCY |
+            | dd30a176034c4b2a8c4a58d52bd41d7d:1 | dd30a176034c4b2a8c4a58d52bd41d7d | a7327d8bf22cee8e35064af2e84fee0e5e1779bc:110 | 58dfe602fae947798115630f6d3c4f50 | 880bbdc3e2da4860aa188d1179c5df58 | fff9cbe9398d4638992913c0d556d58c | ICE            | 1006    | dd5dd397984bf8f2eb986aa1ff7009c9dd0422f2 | DZR-0000000034           | SE             | Spotify             | premium   | 2021-04-01 | RSA221900107 |      | Linija          | 636357852       | Teodora             | Teodora           | 1.000  | EUR             |
+
+        And I have an Online Distribution
+            | NAME          | BUSINESS_LINE | PAYMENT_DATE | TYPE     | DISTRIBUTE_PAID_INVOICES | DISTRIBUTE_SETTLED_INVOICES | STATUS  |
+            | SPX-3195 Dist | ONLINE        | 2020-03-25   | STANDARD | TRUE                     | FALSE                       | PENDING |
+        And Distribution has "Confirmed Claim" defined in database
+            | ID  | CONFIRMED_CLAIM_SET_ID | POTENTIAL_CLAIM_SET_ID             | POTENTIAL_CLAIM_SET_VID          | COMBINED_SHARE | PR_SHARE | MR_SHARE | PR_AMOUNT   | MR_AMOUNT  | COMBINED_AMOUNT |
+            | 661 | 68                     | dd30a176034c4b2a8c4a58d52bd41d7d:1 | dd30a176034c4b2a8c4a58d52bd41d7d | 1              | 1        | 1        | 8           | 5          | 13              |
+        And Distribution has "Confirmed Claim Set" defined in database
+            | ID | PR_AMOUNT   | MR_AMOUNT  | COMBINED_AMOUNT | STATE    | TRANSACTION_CURRENCY | INVOICE_CURRENCY | INVOICE_EXCHANGE_RATE |
+            | 68 | 8           | 5          | 13              | ACCEPTED | EUR                  | EUR              | 1.00000000            |
+        And Distribution has "Sub Distribution" defined in database
+            | ID | RIGHT_TYPE | SOCIETY_CODE | STATUS  |
+            | 1  | OD         | STEMRA       | PENDING |
+            | 2  | MD         | BUMA         | PENDING |
+
+        When the claims for pending distribution are synced
+        Then Claim Distribution should be populated as expected
+            | STATUS           | STATUS REASON         | RIGHT_TYPE | CONFIRMED_CLAIM_SET_ID | CURRENT_DISTRIBUTION_STATUS | POTENTIAL_CLAIM_ID                 | POTENTIAL_CLAIM_SET_ID             | IP_REMITTED_ROYALTY_AMOUNT |
+            | DISTRIBUTABLE    | RECIPROCAL_AGREEMENT  | MD         | 68                     | PENDING                     | dd30a176034c4b2a8c4a58d52bd41d7d:1 | dd30a176034c4b2a8c4a58d52bd41d7d:1 | 5                          |
+            | DISTRIBUTABLE    | RECIPROCAL_AGREEMENT  | OD         | 68                     | PENDING                     | dd30a176034c4b2a8c4a58d52bd41d7d:1 | dd30a176034c4b2a8c4a58d52bd41d7d:1 | 8                          |
+            | CLAIM_DIFFERENCE | OVERCLAIM             | MD         |                        | PENDING                     |                                    |                                    | 2                          |
+            | CLAIM_DIFFERENCE | OVERCLAIM             | OD         |                        | PENDING                     |                                    |                                    | 3                          |
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
